@@ -62,7 +62,7 @@ let chats = new Set()
 
 import cron from 'node-cron'
 
-cron.schedule('1 16 * * *', () => {
+cron.schedule('5 * 16 * * *', () => {
   chats.forEach(x => sendlist(x))
 });
 

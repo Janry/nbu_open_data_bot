@@ -1,6 +1,4 @@
 import { Service } from 'node-windows';
-import path from 'path'
-//var Service = require('node-windows').Service;
 
 // Create a new service object
 var svc = new Service({
