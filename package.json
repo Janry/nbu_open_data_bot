@@ -1,0 +1,14 @@
+{
+  "name": "NBU-exchange-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cron-es6": "^1.0.3",
+    "node-cron": "^3.0.0",
+    "telegraf": "^4.4.2"
+  },
+  "type": "module"
+}

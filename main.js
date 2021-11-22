@@ -1,43 +1,74 @@
-const TelegramBot = require('node-telegram-bot-api');
-const https = require('https')
+import { Telegraf } from 'telegraf'
 
-let db = new Set()
+import { exchangeKeyboard, mainKeyboard } from './keyboard-main.js'
 
-const bot = new TelegramBot(process.env.TELEGRAM_TOKEN, {polling: true});
+const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
 
-bot.onText(/\/reset/, (msg, match) => {
-  db = new Set()
+const rate = 26.9514
 
-  sendlist(msg.chat.id, db)
-});
+bot.start( ctx => {
+    db[ctx.chat.id] = new Set()
 
-bot.onText(/\/add (.+)/, (msg, match) => {
-  const code = match[1].toUpperCase();
+    db[ctx.chat.id].add('USD')
 
-  db.add(code)
-});
+    chats.add(ctx.chat.id)
 
-bot.onText(/\/delete (.+)/, (msg, match) => {
-  const code = match[1].toUpperCase();
-
-  db.delete(code)
-});
-
-bot.on('message', (msg) => {
-  try {
-    const chatId = msg.chat.id;
-
-    bot.sendMessage(chatId, 'Привіт, Друже! Ось актуальні курси:');
-
-    sendlist(chatId, db)
-  } catch (error) {
-    console.error(error.stack)
-    bot.sendMessage(chatId, error.stack);
+    ctx.replyWithMarkdown(
+      `*Національний Банк України.*\nПублічна інформація у формі відкритих даних.`,
+      {
+        reply_markup: {
+          keyboard: mainKeyboard,
+          resize_keyboard: true,
+          one_time_keyboard: true,
+        }
+      }
+    )  
   }
+)
+
+bot.hears('Офіційний курс гривні до іноземних валют та банківських металів', async (ctx) => {
+  ctx.replyWithMarkdown('*Офіційний курс гривні до іноземних валют та банківських металів*',
+  {
+    reply_markup: {
+      keyboard: exchangeKeyboard,
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    }
+  })  
+})
+
+bot.hears('Назад', async (ctx) => {
+  ctx.replyWithMarkdown('*Назад*',
+  {
+    reply_markup: {
+      keyboard: mainKeyboard,
+      resize_keyboard: true,
+      one_time_keyboard: true,
+    }
+  })  
+})
+
+bot.hears('Отримати курс гривні', async (ctx) => {
+  sendlist(ctx.chat.id)
+})
+
+bot.launch()
+
+import * as https from 'https'
+
+let db = {}
+
+let chats = new Set()
+
+import cron from 'node-cron'
+
+cron.schedule('20 0 16 * * *', () => {
+  chats.forEach(x => sendlist(x))
 });
 
-function sendlist(chatId, selected) {
+function sendlist(chatId) {
   https.get('https://bank.gov.ua/NBU_Exchange/exchange?json', (res) => {
+    const selected = db[chatId]
 
     let body = "";
 
@@ -48,23 +79,24 @@ function sendlist(chatId, selected) {
     res.on("end", () => {
         try {
           const result = JSON.parse(body)
-          console.info(result)
 
-          let message = result[0].StartDate + "\n\n"
+          let message = "Ось актуальні курси на *" + result[0].StartDate + "*:\n\n"
 
           result.forEach(row => {
 
             if (selected.size > 0) {
               if (!selected.has(row.CurrencyCodeL)) {
                 return
-              }  
+              }
             }
 
-            const element = row.CurrencyCodeL + " - " + row.Amount + "\n"
+            const element = row.CurrencyCodeL + " - " + row.Amount + ", coef - " + (row.Amount/rate).toFixed(4) + "\n"
             message += element
           });
   
-          bot.sendMessage(chatId, message);
+          bot.telegram.sendMessage(chatId, message, {
+            parse_mode: "Markdown"
+          });
         } catch (error) {
             console.error(error.message);
         };
