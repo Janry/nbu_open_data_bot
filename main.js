@@ -2,7 +2,7 @@ import { Telegraf } from 'telegraf'
 
 import { exchangeKeyboard, mainKeyboard } from './keyboard-main.js'
 
-const bot = new Telegraf(process.env.TELEGRAM_TOKEN)
+const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN)
 
 const rate = 26.9514
 
@@ -62,7 +62,7 @@ let chats = new Set()
 
 import cron from 'node-cron'
 
-cron.schedule('20 0 16 * * *', () => {
+cron.schedule('1 16 * * *', () => {
   chats.forEach(x => sendlist(x))
 });
 
@@ -80,7 +80,7 @@ function sendlist(chatId) {
         try {
           const result = JSON.parse(body)
 
-          let message = "Ось актуальні курси на *" + result[0].StartDate + "*:\n\n"
+          let message = "Ось актуальний курс на *" + result[0].StartDate + "*:\n\n"
 
           result.forEach(row => {
 
