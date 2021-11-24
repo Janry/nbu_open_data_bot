@@ -14,15 +14,14 @@ bot.start( ctx => {
     chats.add(ctx.chat.id)
 
     ctx.replyWithMarkdown(
-      `*Національний Банк України.*\nПублічна інформація у формі відкритих даних.`,
-      {
+      `*Національний Банк України.*\nПублічна інформація у формі відкритих даних.`, {
         reply_markup: {
           keyboard: mainKeyboard,
           resize_keyboard: true,
           one_time_keyboard: true,
         }
       }
-    )  
+    )
   }
 )
 
@@ -34,18 +33,17 @@ bot.hears('Офіційний курс гривні до іноземних ва
       resize_keyboard: true,
       one_time_keyboard: true,
     }
-  })  
+  })
 })
 
 bot.hears('Назад', async (ctx) => {
-  ctx.replyWithMarkdown('*Назад*',
-  {
+  ctx.replyWithMarkdown('*Назад*', {
     reply_markup: {
       keyboard: mainKeyboard,
       resize_keyboard: true,
       one_time_keyboard: true,
     }
-  })  
+  })
 })
 
 bot.hears('Отримати курс гривні', async (ctx) => {
@@ -62,7 +60,7 @@ let chats = new Set()
 
 import cron from 'node-cron'
 
-cron.schedule('5 * 16 * * *', () => {
+cron.schedule('0 16 * * *', () => {
   chats.forEach(x => sendlist(x))
 });
 
@@ -93,9 +91,13 @@ function sendlist(chatId) {
             const element = row.CurrencyCodeL + " - " + row.Amount + ", coef - " + (row.Amount/rate).toFixed(4) + "\n"
             message += element
           });
-  
+
           bot.telegram.sendMessage(chatId, message, {
-            parse_mode: "Markdown"
+            reply_markup: {
+              keyboard: mainKeyboard,
+              resize_keyboard: true,
+              one_time_keyboard: true,
+            }
           });
         } catch (error) {
             console.error(error.message);
