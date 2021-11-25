@@ -97,7 +97,8 @@ function sendlist(chatId) {
               keyboard: mainKeyboard,
               resize_keyboard: true,
               one_time_keyboard: true,
-            }
+            },
+            parse_mode: "Markdown"
           });
         } catch (error) {
             console.error(error.message);
